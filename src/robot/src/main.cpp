@@ -13,6 +13,16 @@
 #include <ros/ros.h>
 #include "std_msgs/String.h"
 
+#define PORT 7777 /* server port */
+#define MAXDATASIZE 1024
+
+#define CMD_DATA_CONTENT 0x80
+#define CMD_DATA_HEADER 0x81
+#define CMD_DATA_FOOTER 0x82
+#define MAX_REV_CONTENT_LEN 1024
+
+#define MAX_SEND_DATA_LEN 1024
+
 int running = 1;
 
 int sock_fd = -1;
