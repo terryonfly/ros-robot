@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 #include <ros/ros.h>
-#include "std_msgs/String.h"
+#include "geometry_msgs/Quaternion.h"
 
 #define PORT 7777 /* server port */
 #define MAXDATASIZE 1024
@@ -131,7 +131,12 @@ void tcpclient_content_decode(unsigned char *buf, size_t len)
         *((unsigned char*)pf+i) = *(px++);
     }
 
-    printf("good data = %.3f\n", left_angle);
+    geometry_msgs::Quaternion quaternion = new geometry_msgs::Quaternion();
+    quaternion.x = left_power;//gyro_z;
+    quaternion.y = right_power;//ctrl_z;
+    quaternion.z = 0.0;
+    quaternion.w = 0.0;
+    cmd_pub.publish(quaternion);
 }
 
 int tcpclient_send(unsigned char *buf, size_t len)
@@ -206,7 +211,7 @@ int main(int argc, char *argv[]) {
     printf("== begin ==\n");
     ros::init(argc, argv, "robot");
     ros::NodeHandle n;
-    pid_pub = n.advertise<std_msgs::String>("robot_pid", 0.5);
+    pid_pub = n.advertise<geometry_msgs::Quaternion>("robot_pid", 100);
     while (n.ok()) {
         int num; /* files descriptors */
         unsigned char buf[MAXDATASIZE]; /* buf will store received text */
