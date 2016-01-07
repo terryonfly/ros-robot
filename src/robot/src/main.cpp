@@ -136,7 +136,7 @@ void tcpclient_content_decode(unsigned char *buf, size_t len)
     quaternion.y = right_power;//ctrl_z;
     quaternion.z = 0.0;
     quaternion.w = 0.0;
-    cmd_pub.publish(quaternion);
+    pid_pub.publish(quaternion);
 }
 
 int tcpclient_send(unsigned char *buf, size_t len)
