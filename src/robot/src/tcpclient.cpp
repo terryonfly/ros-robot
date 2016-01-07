@@ -16,44 +16,7 @@
 
 #include "tcpclient.h"
 
-#define PORT 7777 /* server port */
-#define MAXDATASIZE 1024
-int sock_fd = -1;
-
-pthread_t thread_id;
-int thread_running;
-
-#define CMD_DATA_CONTENT 0x80
-#define CMD_DATA_HEADER 0x81
-#define CMD_DATA_FOOTER 0x82
-#define MAX_REV_CONTENT_LEN 1024
-unsigned char rev_content[MAX_REV_CONTENT_LEN];
-int rev_content_index;
-int rev_is_cmd = 1;
-unsigned char rev_current_cmd;
-
-#define MAX_SEND_DATA_LEN 1024
-unsigned char send_data[MAX_SEND_DATA_LEN];
-
-float rotate_a = 1.0;
-float rotate_x = 0.0;
-float rotate_y = 0.0;
-float rotate_z = 0.0;
-
-float accel_x = 0.0;
-float accel_y = 1.0;
-float accel_z = 0.0;
-
-float magnet_x = 0.0;
-float magnet_y = 0.0;
-float magnet_z = 1.0;
-
-float left_angle = 0.0;
-float right_angle = 0.0;
-float left_power = 0.0;
-float right_power = 0.0;
-
-int tcpclient_init(void) {
+tcpclient(void) {
     int ret;
     thread_running = 1;
     ret = pthread_create(&thread_id, NULL, (void *)tcpclient_run, NULL);
@@ -64,13 +27,13 @@ int tcpclient_init(void) {
     return 0;
 }
 
-void tcpclient_release(void) {
+~tcpclient(void) {
     printf("Release pthread\n");
     thread_running = 0;
     pthread_join(thread_id, NULL);
 }
 
-void tcpclient_run(void) {
+void tcpclient::tcpclient_run(void) {
     while (thread_running) {
         int num; /* files descriptors */
         unsigned char buf[MAXDATASIZE]; /* buf will store received text */
@@ -108,7 +71,7 @@ void tcpclient_run(void) {
     }
 }
 
-void tcpclient_data_decode(unsigned char *buf, size_t len) {
+void tcpclient::tcpclient_data_decode(unsigned char *buf, size_t len) {
     int i, k;
     for (i = 0; i < len; i ++) {
         if (rev_is_cmd) {
@@ -145,25 +108,7 @@ void tcpclient_data_decode(unsigned char *buf, size_t len) {
     }
 }
 
-/*
-unsigned char buf[4];
-float src = 0.123456f;
-unsigned char *pdata = ((unsigned char *)&src);
-for (int i = 0; i < 4; i ++) {
-buf[i] = *pdata++;
-}
-
-float dst;
-void *pf;
-pf = &dst;
-unsigned char* px = buf;
-for(unsigned char i = 0; i < 4; i ++) {
-*((unsigned char*)pf+i) = *(px++);
-}
-printf("%f\n", dst);
- */
-
-void tcpclient_content_decode(unsigned char *buf, size_t len)
+void tcpclient::tcpclient_content_decode(unsigned char *buf, size_t len)
 {
     unsigned char i;
     unsigned char* px = buf;
@@ -240,7 +185,7 @@ void tcpclient_content_decode(unsigned char *buf, size_t len)
     }
 }
 
-int tcpclient_send(unsigned char *buf, size_t len)
+int tcpclient::tcpclient_send(unsigned char *buf, size_t len)
 {
     if (sock_fd == -1) return -1;
     if (len > MAX_SEND_DATA_LEN / 2) return -1;
