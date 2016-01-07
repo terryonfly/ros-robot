@@ -204,8 +204,15 @@ void tcpclient_data_decode(unsigned char *buf, size_t len) {
     }
 }
 
+void cs(int n) {
+    printf("now dowm!\n");
+    running = 0;
+}
+
 int main(int argc, char *argv[]) {
     printf("== begin ==\n");
+    signal(SIGINT, cs);  //ctrl+c
+    signal(SIGTERM, cs);  //kill
     ros::init(argc, argv, "robot");
     ros::NodeHandle n;
     pid_pub = n.advertise<std_msgs::String>("robot_pid", 0.5);
@@ -232,7 +239,7 @@ int main(int argc, char *argv[]) {
             perror("try connect() error ");
         } else {
             printf("connect() successes\n");
-            while (thread_running) {
+            while (running) {
                 if ((num = recv(sock_fd, buf, MAXDATASIZE, 0)) == -1) {
                     perror("recv() error \n");
                 }
