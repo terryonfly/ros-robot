@@ -188,7 +188,7 @@ include_directories(
 # catkin_add_nosetests(test)
 
 set(SOURCE_FILES src/main.cpp)
-add_executable(robot ${SOURCE_FILES} src/test.cpp src/test.h)
+add_executable(robot ${SOURCE_FILES})
 
 target_link_libraries(robot ${catkin_LIBRARIES})
 target_link_libraries(robot m)
