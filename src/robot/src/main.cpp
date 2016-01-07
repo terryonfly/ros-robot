@@ -132,8 +132,8 @@ void tcpclient_content_decode(unsigned char *buf, size_t len)
     }
 
     geometry_msgs::Quaternion quaternion;
-    quaternion.x = left_power;//gyro_z;
-    quaternion.y = right_power;//ctrl_z;
+    quaternion.x = left_angle;//gyro_z;
+    quaternion.y = right_angle;//ctrl_z;
     quaternion.z = 0.0;
     quaternion.w = 0.0;
     pid_pub.publish(quaternion);
