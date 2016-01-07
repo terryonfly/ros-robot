@@ -57,43 +57,6 @@ float right_power = 0.0;
 
 ros::Publisher pid_pub;
 
-void tcpclient_data_decode(unsigned char *buf, size_t len) {
-    int i, k;
-    for (i = 0; i < len; i ++) {
-        if (rev_is_cmd) {
-            if (buf[i] == CMD_DATA_CONTENT || buf[i] == CMD_DATA_HEADER || buf[i] == CMD_DATA_FOOTER) {
-                rev_current_cmd = buf[i];
-                rev_is_cmd = 0;
-            }
-        } else {
-            switch (rev_current_cmd) {
-                case CMD_DATA_CONTENT:
-                    rev_content[rev_content_index] = buf[i];
-                    rev_content_index ++;
-                    if (rev_content_index > MAX_REV_CONTENT_LEN) rev_content_index = 0;
-                    break;
-                case CMD_DATA_HEADER:
-                    // buf[i] is header data
-                    rev_content_index = 0;
-                    break;
-                case CMD_DATA_FOOTER:
-                    // buf[i] is footer data
-//                    for (k = 0; k < rev_content_index; k ++)
-//                        printf("%02x ", rev_content[k]);
-//                    printf("\n");
-                    tcpclient_content_decode(rev_content, rev_content_index);
-
-                    rev_content_index = 0;
-                    break;
-
-                default:
-                    break;
-            }
-            rev_is_cmd = 1;
-        }
-    }
-}
-
 void tcpclient_content_decode(unsigned char *buf, size_t len)
 {
     unsigned char i;
@@ -202,6 +165,43 @@ int tcpclient_send(unsigned char *buf, size_t len)
         return -1;
     }
     return 0;
+}
+
+void tcpclient_data_decode(unsigned char *buf, size_t len) {
+    int i, k;
+    for (i = 0; i < len; i ++) {
+        if (rev_is_cmd) {
+            if (buf[i] == CMD_DATA_CONTENT || buf[i] == CMD_DATA_HEADER || buf[i] == CMD_DATA_FOOTER) {
+                rev_current_cmd = buf[i];
+                rev_is_cmd = 0;
+            }
+        } else {
+            switch (rev_current_cmd) {
+                case CMD_DATA_CONTENT:
+                    rev_content[rev_content_index] = buf[i];
+                    rev_content_index ++;
+                    if (rev_content_index > MAX_REV_CONTENT_LEN) rev_content_index = 0;
+                    break;
+                case CMD_DATA_HEADER:
+                    // buf[i] is header data
+                    rev_content_index = 0;
+                    break;
+                case CMD_DATA_FOOTER:
+                    // buf[i] is footer data
+//                    for (k = 0; k < rev_content_index; k ++)
+//                        printf("%02x ", rev_content[k]);
+//                    printf("\n");
+                    tcpclient_content_decode(rev_content, rev_content_index);
+
+                    rev_content_index = 0;
+                    break;
+
+                default:
+                    break;
+            }
+            rev_is_cmd = 1;
+        }
+    }
 }
 
 int main(int argc, char *argv[]) {
