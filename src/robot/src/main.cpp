@@ -9,7 +9,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <pthread.h>
-#include <signal.h>
 
 #include <ros/ros.h>
 #include "std_msgs/String.h"
@@ -23,8 +22,6 @@
 #define MAX_REV_CONTENT_LEN 1024
 
 #define MAX_SEND_DATA_LEN 1024
-
-int running = 1;
 
 int sock_fd = -1;
 
@@ -134,7 +131,7 @@ void tcpclient_content_decode(unsigned char *buf, size_t len)
         *((unsigned char*)pf+i) = *(px++);
     }
 
-    printf("good data = %.2f\n", left_angle);
+    printf("good data = %.3f\n", left_angle);
 }
 
 int tcpclient_send(unsigned char *buf, size_t len)
@@ -205,19 +202,12 @@ void tcpclient_data_decode(unsigned char *buf, size_t len) {
     }
 }
 
-void cs(int n) {
-    printf("now dowm!\n");
-    running = 0;
-}
-
 int main(int argc, char *argv[]) {
     printf("== begin ==\n");
-    signal(SIGINT, cs);  //ctrl+c
-    signal(SIGTERM, cs);  //kill
     ros::init(argc, argv, "robot");
     ros::NodeHandle n;
     pid_pub = n.advertise<std_msgs::String>("robot_pid", 0.5);
-    while (running) {
+    while (n.ok()) {
         int num; /* files descriptors */
         unsigned char buf[MAXDATASIZE]; /* buf will store received text */
         struct hostent *he; /* structure that will get information about remote host */
@@ -240,7 +230,7 @@ int main(int argc, char *argv[]) {
             perror("try connect() error ");
         } else {
             printf("connect() successes\n");
-            while (running) {
+            while (n.ok()) {
                 if ((num = recv(sock_fd, buf, MAXDATASIZE, 0)) == -1) {
                     perror("recv() error \n");
                 }
