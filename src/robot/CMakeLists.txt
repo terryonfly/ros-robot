@@ -187,8 +187,8 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-set(SOURCE_FILES src/main.cpp src/platform.h src/tcpclient.h src/tcpclient.c src/gl.h src/two_axis_aircraft_shape.h src/two_axis_aircraft_shape.c src/four_axis_aircraft_shape.h src/four_axis_aircraft_shape.c src/vector_shape.h src/vector_shape.c)
-add_executable(robot ${SOURCE_FILES})
+set(SOURCE_FILES src/main.cpp)
+add_executable(robot ${SOURCE_FILES} src/test.cpp src/test.h)
 
 target_link_libraries(robot ${catkin_LIBRARIES})
 target_link_libraries(robot m)
