@@ -217,12 +217,12 @@ int main(int argc, char *argv[]) {
 
         if ((he = gethostbyname("192.168.102.64")) == NULL) {
             perror("gethostbyname() error ");
-            return;
+            return -1;
         }
 
         if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
             perror("socket() error ");
-            return;
+            return -1;
         }
         bzero(&server, sizeof(server));
         server.sin_family = AF_INET;
