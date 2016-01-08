@@ -53,6 +53,9 @@ float right_angle = 0.0;
 float left_power = 0.0;
 float right_power = 0.0;
 
+float control_want = 0.0;
+float control_real = 0.0;
+
 ros::Publisher pid_pub;
 
 void tcpclient_content_decode(unsigned char *buf, size_t len)
@@ -131,9 +134,19 @@ void tcpclient_content_decode(unsigned char *buf, size_t len)
         *((unsigned char*)pf+i) = *(px++);
     }
 
+    pf = &control_want;
+    for(i = 0; i < 4; i ++) {
+        *((unsigned char*)pf+i) = *(px++);
+    }
+
+    pf = &control_real;
+    for(i = 0; i < 4; i ++) {
+        *((unsigned char*)pf+i) = *(px++);
+    }
+
     geometry_msgs::Quaternion quaternion;
-    quaternion.x = left_angle;//gyro_z;
-    quaternion.y = right_angle;//ctrl_z;
+    quaternion.x = control_want;
+    quaternion.y = control_real;
     quaternion.z = 0.0;
     quaternion.w = 0.0;
     pid_pub.publish(quaternion);
@@ -218,7 +231,7 @@ int main(int argc, char *argv[]) {
         struct hostent *he; /* structure that will get information about remote host */
         struct sockaddr_in server;
 
-        if ((he = gethostbyname("192.168.102.64")) == NULL) {
+        if ((he = gethostbyname("192.168.0.151")) == NULL) {
             perror("gethostbyname() error ");
             return -1;
         }
