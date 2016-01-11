@@ -209,9 +209,6 @@ void tcpclient_data_decode(unsigned char *buf, size_t len) {
                     break;
                 case CMD_DATA_FOOTER:
                     // buf[i] is footer data
-//                    for (k = 0; k < rev_content_index; k ++)
-//                        printf("%02x ", rev_content[k]);
-//                    printf("\n");
                     tcpclient_content_decode(rev_content, rev_content_index);
 
                     rev_content_index = 0;
