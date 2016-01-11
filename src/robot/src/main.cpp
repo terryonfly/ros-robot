@@ -58,6 +58,11 @@ float control_real = 0.0;
 
 ros::Publisher pid_pub;
 
+float ctrl_x = 0.0;
+float ctrl_y = 0.0;
+float ctrl_z = 0.0;
+float ctrl_w = 0.0;
+
 void tcpclient_content_decode(unsigned char *buf, size_t len)
 {
     unsigned char i;
@@ -220,11 +225,57 @@ void tcpclient_data_decode(unsigned char *buf, size_t len) {
     }
 }
 
+void sync_ctrl_msg() {
+    unsigned char msg[16];
+    int c_i = 0;
+    unsigned char *pdata;
+    int i;
+
+    printf("ctrl : ");
+    {/* Ctrl */
+        printf("%6.3f ", ctrl_x);
+        pdata = ((unsigned char *) &ctrl_x);
+        for (i = 0; i < 4; i++) {
+            msg[c_i++] = *pdata++;
+        }
+        printf("%6.3f ", ctrl_y);
+        pdata = ((unsigned char *) &ctrl_y);
+        for (i = 0; i < 4; i++) {
+            msg[c_i++] = *pdata++;
+        }
+        printf("%6.3f ", ctrl_z);
+        pdata = ((unsigned char *) &ctrl_z);
+        for (i = 0; i < 4; i++) {
+            msg[c_i++] = *pdata++;
+        }
+        printf("%6.3f ", ctrl_w);
+        pdata = ((unsigned char *) &ctrl_w);
+        for (i = 0; i < 4; i++) {
+            msg[c_i++] = *pdata++;
+        }
+    }
+    printf("\n");
+
+    tcpclient_send(msg, 16);
+}
+
+void robotCtrlCallback(const geometry_msgs::Quaternion::ConstPtr& msg)
+{
+    printf("I heard: %10.6f %10.6f %10.6f %10.6f\n",
+             msg->x, msg->y, msg->z, msg->w);
+    ctrl_x = msg->x * 1000;
+    ctrl_y = msg->y * 1000;
+    ctrl_z = msg->z * 1000;
+    ctrl_w = msg->w * 1000;
+    sync_ctrl_msg();
+}
+
 int main(int argc, char *argv[]) {
     printf("== begin ==\n");
     ros::init(argc, argv, "robot");
     ros::NodeHandle n;
     pid_pub = n.advertise<geometry_msgs::Quaternion>("robot_pid", 100);
+    ros::Subscriber ctrl_sub = n.subscribe("robot_ctrl", 1000, robotCtrlCallback);
     while (n.ok()) {
         int num; /* files descriptors */
         unsigned char buf[MAXDATASIZE]; /* buf will store received text */
@@ -254,11 +305,13 @@ int main(int argc, char *argv[]) {
                 }
                 if (num == 0) break;
                 tcpclient_data_decode(buf, num);
+                ros::spinOnce();
             }
         }
         close(sock_fd);
         sock_fd = -1;
         sleep(1);
+        ros::spinOnce();
     }
     printf("=== end ===\n");
     return 0;
